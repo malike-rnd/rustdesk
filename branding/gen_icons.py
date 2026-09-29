@@ -8,6 +8,7 @@
   res/mac-tray-dark-x2.png  — шаблон (силуэт) для трея macOS
   res/tray-icon.ico         — иконка трея Windows/Linux (32x32, PNG внутри ICO)
   flutter/macos/Runner/AppIcon.icns — иконка приложения macOS
+  flutter/android/.../mipmap-*/ic_stat_logo.png — значок уведомлений Android (белый силуэт «F»)
 Геометрия знака «F» и цвет заданы ниже (координаты в сетке 512x512, сняты с res/icon.png).
 """
 import os
@@ -42,6 +43,32 @@ def gen_svg():
            f'  <path fill="#fff" d="{d}"/>\n</svg>\n')
     with open(path("res", "scalable.svg"), "w", encoding="utf-8", newline="\n") as f:
         f.write(svg)
+
+
+def gen_stat_icons(ss=4):
+    """Android: значок в строке уведомлений — белое «F» на прозрачном фоне."""
+    x0 = min(r[0] for r in F_RECTS); y0 = min(r[1] for r in F_RECTS)
+    x1 = max(r[2] for r in F_RECTS); y1 = max(r[3] for r in F_RECTS)
+    side = (y1 - y0) / 0.84  # поле ~8% с каждой стороны
+    ox = (x0 + x1) / 2 - side / 2
+    oy = (y0 + y1) / 2 - side / 2
+    for dens, size in (("mdpi", 24), ("hdpi", 36), ("xhdpi", 48), ("xxhdpi", 72), ("xxxhdpi", 96)):
+        k = side / size
+        rows = []
+        for y in range(size):
+            row = bytearray()
+            for x in range(size):
+                cov = 0
+                for sy in range(ss):
+                    for sx in range(ss):
+                        px = ox + (x + (sx + 0.5) / ss) * k
+                        py = oy + (y + (sy + 0.5) / ss) * k
+                        if any(a <= px < c and b <= py < d for a, b, c, d in F_RECTS):
+                            cov += 1
+                row += bytes((255, 255, 255, round(255 * cov / (ss * ss))))
+            rows.append(row)
+        with open(path("flutter", "android", "app", "src", "main", "res", f"mipmap-{dens}", "ic_stat_logo.png"), "wb") as f:
+            f.write(png_bytes(size, size, rows))
 
 
 def gen_tray_template(size=60, margin=6, ss=4):
@@ -101,4 +128,5 @@ if __name__ == "__main__":
     gen_tray_template()
     gen_tray_ico()
     gen_icns()
+    gen_stat_icons()
     print("ok")
