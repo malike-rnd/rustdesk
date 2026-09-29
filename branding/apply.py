@@ -14,6 +14,13 @@ import os
 import re
 import sys
 
+# Windows-раннеры: консоль в cp1252 — без этого print() кириллицы падает с UnicodeEncodeError
+for _s in (sys.stdout, sys.stderr):
+    try:
+        _s.reconfigure(encoding="utf-8", errors="replace")
+    except Exception:
+        pass
+
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 CONF = os.path.join(ROOT, "branding", "brand.conf")
 DRY = "--dry-run" in sys.argv
@@ -159,8 +166,8 @@ File("flutter/ios/Runner/Info.plist") \
 
 # --- 5. Linux: ярлыки, служба, flatpak --------------------------------------------------------------
 for rel in ("res/rustdesk.desktop", "res/rustdesk-link.desktop"):
-    File(rel).sub(r"^Name=(?!Open a New Window).*$", f"Name={q(APP)}").save()
-File("res/rustdesk.service").sub(r"^Description=.*$", f"Description={q(APP)}").save()
+    File(rel).sub(r"^Name=(?!Open a New Window)[^\r\n]*", f"Name={q(APP)}").save()
+File("res/rustdesk.service").sub(r"^Description=[^\r\n]*", f"Description={q(APP)}").save()
 File("flatpak/com.rustdesk.RustDesk.metainfo.xml") \
     .sub(r"(</launchable>.*?<name>)[^<]*(</name>)", rf"\g<1>{q(APP)}\2", flags=re.S).save()
 
