@@ -6,16 +6,18 @@ on:
     paths-ignore:
     - "docs/**"
     - "README.md"
-  push:
-    branches:
-      - master
-    paths-ignore:
-      - ".github/**"
-      - "docs/**"
-      - "README.md"
-      - "res/**"
-      - "appimage/**"
-      - "flatpak/**"
+  # FP-форк: полная сборка на каждый push в master отключена (релизы собираются по тегу v*,
+  # см. flutter-tag.yml). Вернуть — раскомментировать.
+  # push:
+  #   branches:
+  #     - master
+  #   paths-ignore:
+  #     - ".github/**"
+  #     - "docs/**"
+  #     - "README.md"
+  #     - "res/**"
+  #     - "appimage/**"
+  #     - "flatpak/**"
 
 jobs:
   run-ci:
