@@ -465,7 +465,7 @@ def init_global_vars(dist_dir, app_name, args):
 
     def read_process_output(args):
         process = subprocess.Popen(
-            f"{dist_app} {args}",
+            f'"{dist_app}" {args}',  # в кавычках: имя приложения может содержать пробел
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
             shell=True,
